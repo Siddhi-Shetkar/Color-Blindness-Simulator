@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChromaSim | Pro Color Blindness Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <nav class="navbar glass-panel">
+            <div class="nav-left">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <h1>ChromaSim</h1>
+                </div>
+                <p class="subtitle">Professional Color Vision Simulator</p>
+            </div>
+            <div class="nav-right">
+                <button id="btn-share" class="icon-btn" title="Share / Copy Image"><i class="fas fa-share-alt"></i></button>
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+            </div>
+        </nav>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Left Panel -->
+            <aside class="left-panel">
+                <div class="glass-panel panel-section upload-section" id="upload-panel">
+                    <h3><i class="fas fa-image"></i> Image Source</h3>
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                        <p>Drag & Drop Image Here</p>
+                        <span class="text-small">or click to browse (Ctrl+O)</span>
+                        <input type="file" id="file-input" accept="image/*" hidden>
+                    </div>
+                </div>
+
+                <div class="glass-panel panel-section info-section">
+                    <h3><i class="fas fa-info-circle"></i> Image Info</h3>
+                    <ul class="info-list" id="image-info-list">
+                        <li><span>Name:</span> <strong id="info-name">-</strong></li>
+                        <li><span>Size:</span> <strong id="info-size">-</strong></li>
+                        <li><span>Resolution:</span> <strong id="info-res">-</strong></li>
+                        <li><span>Format:</span> <strong id="info-format">-</strong></li>
+                    </ul>
+                </div>
+
+                <div class="glass-panel panel-section controls-section">
+                    <h3><i class="fas fa-sliders-h"></i> Adjustments</h3>
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label>Brightness <span id="val-brightness">100</span>%</label>
+                            <input type="range" class="control-slider" data-control="brightness" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label>Contrast <span id="val-contrast">100</span>%</label>
+                            <input type="range" class="control-slider" data-control="contrast" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label>Saturation <span id="val-saturation">100</span>%</label>
+                            <input type="range" class="control-slider" data-control="saturation" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label>Exposure <span id="val-exposure">100</span>%</label>
+                            <input type="range" class="control-slider" data-control="exposure" min="0" max="200" value="100">
+                        </div>
+                        <div class="control-group">
+                            <label>Sharpness <span id="val-sharpness">0</span></label>
+                            <input type="range" class="control-slider" data-control="sharpness" min="0" max="100" value="0">
+                        </div>
+                        <div class="control-group">
+                            <label>Blur <span id="val-blur">0</span>px</label>
+                            <input type="range" class="control-slider" data-control="blur" min="0" max="20" value="0">
+                        </div>
+                    </div>
+                    <button id="btn-reset-adj" class="btn btn-outline"><i class="fas fa-undo"></i> Reset Adjustments</button>
+                </div>
+            </aside>
+
+            <!-- Center Panel -->
+            <section class="center-panel">
+                <div class="preview-container" id="preview-container">
+                    <div class="placeholder-text" id="preview-placeholder">
+                        Upload an image to start simulating.
+                    </div>
+                    
+                    <div class="canvas-wrapper" id="canvas-wrapper" style="display: none;">
+                        <canvas id="canvas-original"></canvas>
+                        <div class="simulated-layer" id="simulated-layer">
+                            <canvas id="canvas-simulated"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="split-slider" id="split-slider" style="display: none;">
+                        <div class="slider-handle"><i class="fas fa-arrows-alt-h"></i></div>
+                    </div>
+
+                    <div class="floating-controls" id="floating-controls" style="display: none;">
+                        <button id="btn-zoom-in" class="icon-btn" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                        <button id="btn-zoom-out" class="icon-btn" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                        <button id="btn-zoom-reset" class="icon-btn" title="Reset Zoom"><i class="fas fa-expand"></i></button>
+                        <button id="btn-fullscreen" class="icon-btn" title="Fullscreen (F)"><i class="fas fa-compress"></i></button>
+                    </div>
+
+                    <div class="loading-overlay" id="loading-overlay">
+                        <div class="spinner"></div>
+                        <p>Processing...</p>
+                    </div>
+                </div>
+                
+                <div class="action-bar glass-panel">
+                    <div class="comparison-modes">
+                        <button class="mode-btn active" data-mode="slider"><i class="fas fa-sliders-h"></i> Slider</button>
+                        <button class="mode-btn" data-mode="side"><i class="fas fa-columns"></i> Side by Side</button>
+                        <button class="mode-btn" data-mode="overlay"><i class="fas fa-layer-group"></i> Overlay</button>
+                    </div>
+                    <button id="btn-download" class="btn btn-primary"><i class="fas fa-download"></i> Download Image</button>
+                </div>
+            </section>
+
+            <!-- Right Panel -->
+            <aside class="right-panel">
+                <div class="glass-panel panel-section">
+                    <h3><i class="fas fa-eye"></i> Vision Simulation</h3>
+                    <div class="sim-cards">
+                        <div class="sim-card active" data-mode="normal">
+                            <div class="sim-icon">👁️</div>
+                            <div class="sim-info">
+                                <h4>Normal Vision</h4>
+                                <p>No deficiency</p>
+                            </div>
+                        </div>
+                        <div class="sim-card" data-mode="protanopia">
+                            <div class="sim-icon">❤️</div>
+                            <div class="sim-info">
+                                <h4>Protanopia</h4>
+                                <p>Red-Blind</p>
+                            </div>
+                        </div>
+                        <div class="sim-card" data-mode="deuteranopia">
+                            <div class="sim-icon">💚</div>
+                            <div class="sim-info">
+                                <h4>Deuteranopia</h4>
+                                <p>Green-Blind</p>
+                            </div>
+                        </div>
+                        <div class="sim-card" data-mode="tritanopia">
+                            <div class="sim-icon">💙</div>
+                            <div class="sim-info">
+                                <h4>Tritanopia</h4>
+                                <p>Blue-Blind</p>
+                            </div>
+                        </div>
+                        <div class="sim-card" data-mode="achromatopsia">
+                            <div class="sim-icon">⚫</div>
+                            <div class="sim-info">
+                                <h4>Achromatopsia</h4>
+                                <p>Complete Monochromacy</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel panel-section a11y-section">
+                    <h3><i class="fas fa-universal-access"></i> Accessibility Info</h3>
+                    <div class="a11y-content">
+                        <h4 id="info-title">Normal Vision</h4>
+                        <div class="a11y-stat">
+                            <i class="fas fa-users"></i> <span id="info-pop">N/A</span>
+                        </div>
+                        <p id="info-desc">Standard color vision with no deficiencies.</p>
+                        <div class="tips-box">
+                            <h5><i class="fas fa-lightbulb"></i> Design Tip</h5>
+                            <p id="info-tips">Ensure high contrast for general readability.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel panel-section history-section">
+                    <h3><i class="fas fa-history"></i> Recent Images</h3>
+                    <div class="history-gallery" id="history-gallery">
+                        <!-- History items injected here -->
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
